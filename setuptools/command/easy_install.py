@@ -48,7 +48,7 @@ from setuptools.package_index import PackageIndex
 from setuptools.package_index import URL_SCHEME
 from setuptools.command import bdist_egg, egg_info
 from setuptools.compat import (iteritems, maxsize, basestring, unicode,
-                               reraise, PY2, PY3)
+                               reraise, PY2, PY3, IS_WINDOWS)
 from pkg_resources import (
     yield_lines, normalize_path, resource_string, ensure_directory,
     get_distribution, find_distributions, Environment, Requirement,
@@ -356,7 +356,7 @@ class easy_install(Command):
         for attr in attrs:
             val = getattr(self, attr)
             if val is not None:
-                if os.name == 'posix' or os.name == 'nt':
+                if os.name == 'posix' or IS_WINDOWS:
                     val = os.path.expanduser(val)
                 val = subst_vars(val, self.config_vars)
                 setattr(self, attr, val)
@@ -1606,7 +1606,7 @@ def _first_line_re():
 
 
 def auto_chmod(func, arg, exc):
-    if func is os.remove and os.name == 'nt':
+    if func is os.remove and IS_WINDOWS:
         chmod(arg, stat.S_IWRITE)
         return func(arg)
     et, ev, _ = sys.exc_info()
@@ -1947,11 +1947,6 @@ class JythonCommandSpec(CommandSpec):
         )
 
     @classmethod
-    def from_environment(cls):
-        string = '"' + cls._sys_executable() + '"'
-        return cls.from_string(string)
-
-    @classmethod
     def from_string(cls, string):
         return cls([string])
 
@@ -2041,7 +2036,7 @@ class ScriptWriter(object):
         """
         Select the best ScriptWriter for this environment.
         """
-        return WindowsScriptWriter.best() if sys.platform == 'win32' else cls
+        return WindowsScriptWriter.best() if IS_WINDOWS else cls
 
     @classmethod
     def _get_script_args(cls, type_, name, header, script_text):
