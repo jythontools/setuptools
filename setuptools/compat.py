@@ -1,5 +1,10 @@
 import sys
+import os
 import itertools
+
+IS_WINDOWS = (sys.platform.startswith("win")
+              or (sys.platform == 'cli' and os.name == 'nt')
+              or (os.name == 'java' and os._name == 'nt'))
 
 PY3 = sys.version_info >= (3,)
 PY2 = not PY3
